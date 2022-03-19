@@ -13,7 +13,7 @@ import java.time.Duration;
 import java.util.Properties;
 
 public class CoinAnalysisJob {
-    public static void main(String[] args) {
+    public static void main(String[] args) throws Exception {
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
 
         String inputTopic = "coin-analyst.tickers.dev";
@@ -37,5 +37,8 @@ public class CoinAnalysisJob {
 
         // Just print source data
         tickers.print();
+
+        env.execute("Coin Data Analysis");
+
     }
 }
