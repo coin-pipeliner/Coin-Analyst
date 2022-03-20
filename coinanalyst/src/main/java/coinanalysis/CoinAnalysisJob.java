@@ -35,7 +35,9 @@ public class CoinAnalysisJob {
                 .<Ticker>forBoundedOutOfOrderness(Duration.ofMillis(200))
                 .withTimestampAssigner((ticker, l) -> ticker.getTimestamp());
 
-        DataStream<Ticker> tickers = env.fromSource(source, watermarkStrategy, "Ticker Source");
+        DataStream<Ticker> tickers = env.fromSource(source, watermarkStrategy, "Ticker Source").keyBy(
+                Ticker::getCode
+        );
 
         // Just print source data
         tickers.print();
