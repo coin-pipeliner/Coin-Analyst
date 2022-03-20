@@ -22,7 +22,7 @@ public class CoinAnalysisJob {
 
         Properties kafkaProps = new Properties();
         kafkaProps.setProperty(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, brokers);
-        kafkaProps.setProperty(ConsumerConfig.GROUP_ID_CONFIG, "click-event-count");
+        kafkaProps.setProperty(ConsumerConfig.GROUP_ID_CONFIG, groupId);
 
         KafkaSource<Ticker> source = KafkaSource.<Ticker>builder()
                 .setTopics(inputTopic)
