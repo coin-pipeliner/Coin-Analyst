@@ -2,6 +2,16 @@
 Flink based coin analysis
 
 # How to Run?
+
+## Flink application
+### Build fink application
+```sh
+cd coinanalyst
+mvn clean install -DskipTests
+cp coinanalyst/target/coinanalyst-1.0-SNAPSHOT.jar ./ 
+```
+
+## Flink cluster
 ### Build docker & run
 ```sh
 docker build -t flink .
@@ -18,7 +28,7 @@ You have to bind port on 8081 for flink web ui
 ### Submit flink job
 ```sh
 # This is a flink container
-./bin/flink run FLINK_APPLICATION.jar
+./bin/flink run coinanalyst-1.0-SNAPSHOT.jar
 ```
 
 ### Access web UI
