@@ -21,14 +21,14 @@ public class Ticker {
     private double prevClosingPrice;
     private String change;
     private double changePrice;
-    private double signedChange_price;
+    private double signedChangePrice;
     private double changeRate;
-    private double signedChange_rate;
+    private double signedChangeRate;
     private double tradeVolume;
     private double accTradeVolume;
-    private double accTradeVolume_24h;
+    private double accTradeVolume24H;
     private double accTradePrice;
-    private double accTradePrice_24h;
+    private double accTradePrice24H;
     private Date tradeDate;
     private Date tradeTime;
     private long tradeTimestamp;
@@ -60,14 +60,14 @@ public class Ticker {
         this.prevClosingPrice = prevClosingPrice;
         this.change = change;
         this.changePrice = changePrice;
-        this.signedChange_price = signedChange_price;
+        this.signedChangePrice = signedChange_price;
         this.changeRate = changeRate;
-        this.signedChange_rate = signedChange_rate;
+        this.signedChangeRate = signedChange_rate;
         this.tradeVolume = tradeVolume;
         this.accTradeVolume = accTradeVolume;
-        this.accTradeVolume_24h = accTradeVolume_24h;
+        this.accTradeVolume24H = accTradeVolume_24h;
         this.accTradePrice = accTradePrice;
-        this.accTradePrice_24h = accTradePrice_24h;
+        this.accTradePrice24H = accTradePrice_24h;
         this.tradeDate = tradeDate;
         this.tradeTime = tradeTime;
         this.tradeTimestamp = tradeTimestamp;
@@ -123,16 +123,16 @@ public class Ticker {
         return changePrice;
     }
 
-    public double getSignedChange_price() {
-        return signedChange_price;
+    public double getSignedChangePrice() {
+        return signedChangePrice;
     }
 
     public double getChangeRate() {
         return changeRate;
     }
 
-    public double getSignedChange_rate() {
-        return signedChange_rate;
+    public double getSignedChangeRate() {
+        return signedChangeRate;
     }
 
     public double getTradeVolume() {
@@ -143,16 +143,16 @@ public class Ticker {
         return accTradeVolume;
     }
 
-    public double getAccTradeVolume_24h() {
-        return accTradeVolume_24h;
+    public double getAccTradeVolume24H() {
+        return accTradeVolume24H;
     }
 
     public double getAccTradePrice() {
         return accTradePrice;
     }
 
-    public double getAccTradePrice_24h() {
-        return accTradePrice_24h;
+    public double getAccTradePrice24H() {
+        return accTradePrice24H;
     }
 
     public Date getTradeDate() {
@@ -255,16 +255,16 @@ public class Ticker {
         this.changePrice = changePrice;
     }
 
-    public void setSignedChange_price(double signedChange_price) {
-        this.signedChange_price = signedChange_price;
+    public void setSignedChangePrice(double signedChangePrice) {
+        this.signedChangePrice = signedChangePrice;
     }
 
     public void setChangeRate(double changeRate) {
         this.changeRate = changeRate;
     }
 
-    public void setSignedChange_rate(double signedChange_rate) {
-        this.signedChange_rate = signedChange_rate;
+    public void setSignedChangeRate(double signedChangeRate) {
+        this.signedChangeRate = signedChangeRate;
     }
 
     public void setTradeVolume(double tradeVolume) {
@@ -275,16 +275,16 @@ public class Ticker {
         this.accTradeVolume = accTradeVolume;
     }
 
-    public void setAccTradeVolume_24h(double accTradeVolume_24h) {
-        this.accTradeVolume_24h = accTradeVolume_24h;
+    public void setAccTradeVolume24H(double accTradeVolume24H) {
+        this.accTradeVolume24H = accTradeVolume24H;
     }
 
     public void setAccTradePrice(double accTradePrice) {
         this.accTradePrice = accTradePrice;
     }
 
-    public void setAccTradePrice_24h(double accTradePrice_24h) {
-        this.accTradePrice_24h = accTradePrice_24h;
+    public void setAccTradePrice24H(double accTradePrice24H) {
+        this.accTradePrice24H = accTradePrice24H;
     }
 
     public void setTradeDate(Date tradeDate) {
@@ -356,12 +356,12 @@ public class Ticker {
         if (this == o) return true;
         if (!(o instanceof Ticker)) return false;
         Ticker ticker = (Ticker) o;
-        return Double.compare(ticker.getOpeningPrice(), getOpeningPrice()) == 0 && Double.compare(ticker.getHighPrice(), getHighPrice()) == 0 && Double.compare(ticker.getLowPrice(), getLowPrice()) == 0 && Double.compare(ticker.getTradePrice(), getTradePrice()) == 0 && Double.compare(ticker.getPrevClosingPrice(), getPrevClosingPrice()) == 0 && Double.compare(ticker.getChangePrice(), getChangePrice()) == 0 && Double.compare(ticker.getSignedChange_price(), getSignedChange_price()) == 0 && Double.compare(ticker.getChangeRate(), getChangeRate()) == 0 && Double.compare(ticker.getSignedChange_rate(), getSignedChange_rate()) == 0 && Double.compare(ticker.getTradeVolume(), getTradeVolume()) == 0 && Double.compare(ticker.getAccTradeVolume(), getAccTradeVolume()) == 0 && Double.compare(ticker.getAccTradeVolume_24h(), getAccTradeVolume_24h()) == 0 && Double.compare(ticker.getAccTradePrice(), getAccTradePrice()) == 0 && Double.compare(ticker.getAccTradePrice_24h(), getAccTradePrice_24h()) == 0 && getTradeTimestamp() == ticker.getTradeTimestamp() && Double.compare(ticker.getAccAskVolume(), getAccAskVolume()) == 0 && Double.compare(ticker.getAccBidVolume(), getAccBidVolume()) == 0 && Double.compare(ticker.getHighest52WeekPrice(), getHighest52WeekPrice()) == 0 && Double.compare(ticker.getLowest52WeekPrice(), getLowest52WeekPrice()) == 0 && isTradingSuspended() == ticker.isTradingSuspended() && getTimestamp() == ticker.getTimestamp() && Objects.equals(getType(), ticker.getType()) && Objects.equals(getCode(), ticker.getCode()) && Objects.equals(getChange(), ticker.getChange()) && Objects.equals(getTradeDate(), ticker.getTradeDate()) && Objects.equals(getTradeTime(), ticker.getTradeTime()) && Objects.equals(getAskBid(), ticker.getAskBid()) && Objects.equals(getHighest52WeekDate(), ticker.getHighest52WeekDate()) && Objects.equals(getLowest52WeekDate(), ticker.getLowest52WeekDate()) && Objects.equals(getMarketState(), ticker.getMarketState()) && Objects.equals(getDelistingDate(), ticker.getDelistingDate()) && Objects.equals(getMarketWarning(), ticker.getMarketWarning()) && Objects.equals(getStreamType(), ticker.getStreamType());
+        return Double.compare(ticker.getOpeningPrice(), getOpeningPrice()) == 0 && Double.compare(ticker.getHighPrice(), getHighPrice()) == 0 && Double.compare(ticker.getLowPrice(), getLowPrice()) == 0 && Double.compare(ticker.getTradePrice(), getTradePrice()) == 0 && Double.compare(ticker.getPrevClosingPrice(), getPrevClosingPrice()) == 0 && Double.compare(ticker.getChangePrice(), getChangePrice()) == 0 && Double.compare(ticker.getSignedChangePrice(), getSignedChangePrice()) == 0 && Double.compare(ticker.getChangeRate(), getChangeRate()) == 0 && Double.compare(ticker.getSignedChangeRate(), getSignedChangeRate()) == 0 && Double.compare(ticker.getTradeVolume(), getTradeVolume()) == 0 && Double.compare(ticker.getAccTradeVolume(), getAccTradeVolume()) == 0 && Double.compare(ticker.getAccTradeVolume24H(), getAccTradeVolume24H()) == 0 && Double.compare(ticker.getAccTradePrice(), getAccTradePrice()) == 0 && Double.compare(ticker.getAccTradePrice24H(), getAccTradePrice24H()) == 0 && getTradeTimestamp() == ticker.getTradeTimestamp() && Double.compare(ticker.getAccAskVolume(), getAccAskVolume()) == 0 && Double.compare(ticker.getAccBidVolume(), getAccBidVolume()) == 0 && Double.compare(ticker.getHighest52WeekPrice(), getHighest52WeekPrice()) == 0 && Double.compare(ticker.getLowest52WeekPrice(), getLowest52WeekPrice()) == 0 && isTradingSuspended() == ticker.isTradingSuspended() && getTimestamp() == ticker.getTimestamp() && Objects.equals(getType(), ticker.getType()) && Objects.equals(getCode(), ticker.getCode()) && Objects.equals(getChange(), ticker.getChange()) && Objects.equals(getTradeDate(), ticker.getTradeDate()) && Objects.equals(getTradeTime(), ticker.getTradeTime()) && Objects.equals(getAskBid(), ticker.getAskBid()) && Objects.equals(getHighest52WeekDate(), ticker.getHighest52WeekDate()) && Objects.equals(getLowest52WeekDate(), ticker.getLowest52WeekDate()) && Objects.equals(getMarketState(), ticker.getMarketState()) && Objects.equals(getDelistingDate(), ticker.getDelistingDate()) && Objects.equals(getMarketWarning(), ticker.getMarketWarning()) && Objects.equals(getStreamType(), ticker.getStreamType());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(getType(), getCode(), getOpeningPrice(), getHighPrice(), getLowPrice(), getTradePrice(), getPrevClosingPrice(), getChange(), getChangePrice(), getSignedChange_price(), getChangeRate(), getSignedChange_rate(), getTradeVolume(), getAccTradeVolume(), getAccTradeVolume_24h(), getAccTradePrice(), getAccTradePrice_24h(), getTradeDate(), getTradeTime(), getTradeTimestamp(), getAskBid(), getAccAskVolume(), getAccBidVolume(), getHighest52WeekPrice(), getHighest52WeekDate(), getLowest52WeekPrice(), getLowest52WeekDate(), getMarketState(), isTradingSuspended(), getDelistingDate(), getMarketWarning(), getTimestamp(), getStreamType());
+        return Objects.hash(getType(), getCode(), getOpeningPrice(), getHighPrice(), getLowPrice(), getTradePrice(), getPrevClosingPrice(), getChange(), getChangePrice(), getSignedChangePrice(), getChangeRate(), getSignedChangeRate(), getTradeVolume(), getAccTradeVolume(), getAccTradeVolume24H(), getAccTradePrice(), getAccTradePrice24H(), getTradeDate(), getTradeTime(), getTradeTimestamp(), getAskBid(), getAccAskVolume(), getAccBidVolume(), getHighest52WeekPrice(), getHighest52WeekDate(), getLowest52WeekPrice(), getLowest52WeekDate(), getMarketState(), isTradingSuspended(), getDelistingDate(), getMarketWarning(), getTimestamp(), getStreamType());
     }
 
     @Override
@@ -376,14 +376,14 @@ public class Ticker {
                 ", prevClosingPrice=" + prevClosingPrice +
                 ", change='" + change + '\'' +
                 ", changePrice=" + changePrice +
-                ", signedChange_price=" + signedChange_price +
+                ", signedChange_price=" + signedChangePrice +
                 ", changeRate=" + changeRate +
-                ", signedChange_rate=" + signedChange_rate +
+                ", signedChange_rate=" + signedChangeRate +
                 ", tradeVolume=" + tradeVolume +
                 ", accTradeVolume=" + accTradeVolume +
-                ", accTradeVolume_24h=" + accTradeVolume_24h +
+                ", accTradeVolume_24h=" + accTradeVolume24H +
                 ", accTradePrice=" + accTradePrice +
-                ", accTradePrice_24h=" + accTradePrice_24h +
+                ", accTradePrice_24h=" + accTradePrice24H +
                 ", tradeDate=" + tradeDate +
                 ", tradeTime=" + tradeTime +
                 ", tradeTimestamp=" + tradeTimestamp +
