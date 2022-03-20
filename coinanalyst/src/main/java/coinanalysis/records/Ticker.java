@@ -1,5 +1,8 @@
 package coinanalysis.records;
 
+import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.databind.PropertyNamingStrategies;
+import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.databind.annotation.JsonNaming;
+
 import java.util.Date;
 import java.util.Objects;
 
@@ -9,6 +12,7 @@ import java.util.Objects;
  * 아래 문서를 참고하시길 바랍니다.
  * https://docs.upbit.com/docs/upbit-quotation-websocket#%ED%98%84%EC%9E%AC%EA%B0%80ticker-%EC%9D%91%EB%8B%B5
  */
+@JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
 public class Ticker {
 
 
