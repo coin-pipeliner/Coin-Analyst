@@ -9,7 +9,7 @@ import java.io.IOException;
 /**
  * 카프카의 역직렬화 스키마{@link DeserializationSchema}입니다.
  *
- * JSON으로부터 {@link Ticker}를 역질렬화 합니다.
+ * {@link Ticker}를 역질렬화 합니다.
  */
 public class TickerDeserializationSchema implements DeserializationSchema<Ticker> {
 

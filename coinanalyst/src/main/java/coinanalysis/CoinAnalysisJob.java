@@ -18,6 +18,7 @@ public class CoinAnalysisJob {
 
         String inputTopic = "coin-analyst.tickers.dev";
         String brokers = "localhost:9092";
+        String groupId = "coin-analyst";
 
         Properties kafkaProps = new Properties();
         kafkaProps.setProperty(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, brokers);
@@ -25,6 +26,7 @@ public class CoinAnalysisJob {
 
         KafkaSource<Ticker> source = KafkaSource.<Ticker>builder()
                 .setTopics(inputTopic)
+                .setGroupId(groupId)
                 .setValueOnlyDeserializer(new TickerDeserializationSchema())
                 .setProperties(kafkaProps)
                 .build();
