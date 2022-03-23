@@ -1,0 +1,3 @@
+coinanalyst/target/*
+coinanalyst/.idea
+coinanalyst/dependency-reduced-pom.xml

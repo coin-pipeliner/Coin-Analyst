@@ -15,20 +15,18 @@ cp coinanalyst/target/coinanalyst-1.0-SNAPSHOT.jar ./
 ### Build docker & run
 ```sh
 docker build -t flink .
-docker run -it -p 8081:8081 flink /bin/bash
+docker run -d -p 8081:8081 flink
 ```
 You have to bind port on 8081 for flink web ui
 
 ### Start flink cluster
 ```sh
-# This is a flink container 
-./bin/start-cluster.sh
+docker exec <FLINK-CONTAINER-ID> ./bin/start-cluster.sh
 ```
 
 ### Submit flink job
 ```sh
-# This is a flink container
-./bin/flink run coinanalyst-1.0-SNAPSHOT.jar
+docker exec <FLINK-CONTAINER-ID> ./bin/flink run coinanalyst-1.0-SNAPSHOT.jar
 ```
 
 ### Access web UI
