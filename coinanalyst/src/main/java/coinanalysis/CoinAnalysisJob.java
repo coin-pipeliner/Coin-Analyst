@@ -3,16 +3,11 @@ package coinanalysis;
 import coinanalysis.records.Ticker;
 import coinanalysis.records.TickerDeserializationSchema;
 import org.apache.flink.api.common.eventtime.WatermarkStrategy;
-import org.apache.flink.api.java.tuple.Tuple;
-import org.apache.flink.api.java.tuple.Tuple3;
 import org.apache.flink.connector.kafka.source.KafkaSource;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
-import org.apache.flink.streaming.api.functions.windowing.ProcessWindowFunction;
 import org.apache.flink.streaming.api.windowing.assigners.SlidingEventTimeWindows;
 import org.apache.flink.streaming.api.windowing.time.Time;
-import org.apache.flink.streaming.api.windowing.windows.TimeWindow;
-import org.apache.flink.util.Collector;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.producer.ProducerConfig;
 
@@ -47,7 +42,7 @@ public class CoinAnalysisJob {
         // Just print source data
         tickers.print();
 
-        DataStream<Float> averagePrices = tickers
+        DataStream<Double> averagePrices = tickers
                 .keyBy(Ticker::getCode)
                 .window(SlidingEventTimeWindows.of(Time.minutes(1), Time.seconds(10)))
                 .process(new CoinAnalyzer())
