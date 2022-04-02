@@ -18,8 +18,8 @@ public class CoinAnalysisJob {
     public static void main(String[] args) throws Exception {
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
 
-        String inputTopic = "coin-analyst.tickers.dev";
-        String brokers = "localhost:9092";
+        String inputTopic = "dev.coin-pipeliner.KRW-BTC";
+        String brokers = "kafka1:19091,kafka2:19092,kafka3:19093";
         String groupId = "coin-analyst";
 
         Properties kafkaProps = new Properties();
@@ -40,7 +40,7 @@ public class CoinAnalysisJob {
         DataStream<Ticker> tickers = env.fromSource(source, watermarkStrategy, "Ticker Source");
 
         // Just print source data
-        tickers.print();
+//        tickers.print();
 
         DataStream<Double> averagePrices = tickers
                 .keyBy(Ticker::getCode)
