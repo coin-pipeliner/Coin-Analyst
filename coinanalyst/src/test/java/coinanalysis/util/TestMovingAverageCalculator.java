@@ -7,7 +7,7 @@ import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 
-public class TestCoinAnalyzer {
+public class TestMovingAverageCalculator {
 
     @Test
     void tickerDeserializationTest() throws IOException {

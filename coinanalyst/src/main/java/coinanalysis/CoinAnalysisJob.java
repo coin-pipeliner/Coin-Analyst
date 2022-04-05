@@ -39,17 +39,29 @@ public class CoinAnalysisJob {
 
         DataStream<Ticker> tickers = env.fromSource(source, watermarkStrategy, "Ticker Source");
 
-        // Just print source data
-//        tickers.print();
-
-        DataStream<Double> averagePrices = tickers
+        DataStream<Double> movingAveragePrices = tickers
                 .keyBy(Ticker::getCode)
-                .window(SlidingEventTimeWindows.of(Time.minutes(1), Time.seconds(10)))
-                .process(new CoinAnalyzer())
-                .name("Analyzing Coin Price");
+                .window(SlidingEventTimeWindows.of(Time.minutes(1), Time.seconds(1)))
+                .process(new MovingAverageCalculator())
+                .name("1 minutes average");
 
-        averagePrices.print();
+        DataStream<Double> min10MovingAveragePrices = tickers
+                .keyBy(Ticker::getCode)
+                .window(SlidingEventTimeWindows.of(Time.minutes(10), Time.seconds(1)))
+                .process(new MovingAverageCalculator())
+                .name("10 minutes average");
 
+
+        DataStream<Double> hourMovingAveragePrices = tickers
+                .keyBy(Ticker::getCode)
+                .window(SlidingEventTimeWindows.of(Time.hours(1), Time.minutes(1)))
+                .process(new MovingAverageCalculator())
+                .name("1 hours average");
+
+
+        movingAveragePrices.print("1 minutes average");
+        min10MovingAveragePrices.print("10 minutes average");
+        hourMovingAveragePrices.print("1 hours average");
         env.execute("Coin Data Analysis");
 
     }
