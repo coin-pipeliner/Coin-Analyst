@@ -1,5 +1,6 @@
 package coinanalysis;
 
+import coinanalysis.records.Candle;
 import coinanalysis.records.Ticker;
 import coinanalysis.records.TickerDeserializationSchema;
 import org.apache.flink.api.common.eventtime.WatermarkStrategy;
@@ -58,7 +59,16 @@ public class CoinAnalysisJob {
                 .process(new MovingAverageCalculator())
                 .name("1 hours average");
 
+        DataStream<Candle> minuteCandlePrices = tickers
+                .keyBy(Ticker::getCode)
+                .window(SlidingEventTimeWindows.of(Time.minutes(1), Time.seconds(1)))
+                .process(new CandleChartCalculator())
+                .name("1 minutes candle");
 
+
+
+
+        minuteCandlePrices.print("1 minutes candle");
         movingAveragePrices.print("1 minutes average");
         min10MovingAveragePrices.print("10 minutes average");
         hourMovingAveragePrices.print("1 hours average");
