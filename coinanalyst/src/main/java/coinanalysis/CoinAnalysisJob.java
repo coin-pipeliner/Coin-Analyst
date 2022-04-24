@@ -66,8 +66,17 @@ public class CoinAnalysisJob {
                 .name("1 minutes candle");
 
 
+        DataStream<Double> hourMomentumPrices = minuteCandlePrices
+                .keyBy(Candle::getCode)
+                .window(SlidingEventTimeWindows.of(Time.hours(1), Time.minutes(1)))
+                .process(new MomentumCalculator())
+                .name("1 hours momentum");
 
 
+
+
+
+        hourMomentumPrices.print("1 hours momentum");
         minuteCandlePrices.print("1 minutes candle");
         movingAveragePrices.print("1 minutes average");
         min10MovingAveragePrices.print("10 minutes average");

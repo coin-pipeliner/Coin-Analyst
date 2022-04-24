@@ -6,15 +6,7 @@ public class Candle {
     double lowPrice;
     double endPrice;
     double volume;
-
-    public Candle(double startPrice, double highPrice, double lowPrice, double endPrice, double volume) {
-        this.startPrice = startPrice;
-        this.highPrice = highPrice;
-        this.lowPrice = lowPrice;
-        this.endPrice = endPrice;
-        this.volume = volume;
-    }
-
+    String code;
 
 
     @Override
@@ -25,7 +17,17 @@ public class Candle {
                 ", lowPrice=" + lowPrice +
                 ", endPrice=" + endPrice +
                 ", volume=" + volume +
+                ", code='" + code + '\'' +
                 '}';
+    }
+
+    public Candle(double startPrice, double highPrice, double lowPrice, double endPrice, double volume, String code) {
+        this.startPrice = startPrice;
+        this.highPrice = highPrice;
+        this.lowPrice = lowPrice;
+        this.endPrice = endPrice;
+        this.volume = volume;
+        this.code = code;
     }
 
     public double getStartPrice() {
@@ -66,5 +68,13 @@ public class Candle {
 
     public void setVolume(double volume) {
         this.volume = volume;
+    }
+
+    public String getCode() {
+        return code;
+    }
+
+    public void setCode(String code) {
+        this.code = code;
     }
 }

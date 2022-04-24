@@ -37,7 +37,7 @@ public class CandleChartCalculator extends ProcessWindowFunction<Ticker, Candle,
         endPrice = curPrice;
 
 
-        results.collect(new Candle(startPrice,highPrice,lowPrice,endPrice,volume));
+        results.collect(new Candle(startPrice,highPrice,lowPrice,endPrice,volume,key));
 
     }
 }
