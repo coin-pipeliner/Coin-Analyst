@@ -5,9 +5,9 @@ public class Candle {
     double highPrice;
     double lowPrice;
     double endPrice;
-    long volume;
+    double volume;
 
-    public Candle(double startPrice, double highPrice, double lowPrice, double endPrice, long volume) {
+    public Candle(double startPrice, double highPrice, double lowPrice, double endPrice, double volume) {
         this.startPrice = startPrice;
         this.highPrice = highPrice;
         this.lowPrice = lowPrice;
@@ -60,11 +60,11 @@ public class Candle {
         this.endPrice = endPrice;
     }
 
-    public long getVolume() {
+    public double getVolume() {
         return volume;
     }
 
-    public void setVolume(long volume) {
+    public void setVolume(double volume) {
         this.volume = volume;
     }
 }

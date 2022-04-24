@@ -32,7 +32,7 @@ public class CandleChartCalculator extends ProcessWindowFunction<Ticker, Candle,
             }
             highPrice = Math.max(curPrice,highPrice);
             lowPrice = Math.min(curPrice,lowPrice);
-            volume++;
+            volume+=ticker.getTradeVolume();
         }
         endPrice = curPrice;
 
