@@ -4,11 +4,17 @@ import coinanalysis.records.Candle;
 import coinanalysis.records.Ticker;
 import coinanalysis.records.TickerDeserializationSchema;
 import org.apache.flink.api.common.eventtime.WatermarkStrategy;
+import org.apache.flink.api.common.functions.FlatMapFunction;
+import org.apache.flink.api.java.functions.KeySelector;
 import org.apache.flink.connector.kafka.source.KafkaSource;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
+import org.apache.flink.streaming.api.functions.co.CoMapFunction;
+import org.apache.flink.streaming.api.functions.co.CoProcessFunction;
 import org.apache.flink.streaming.api.windowing.assigners.SlidingEventTimeWindows;
+import org.apache.flink.streaming.api.windowing.assigners.TumblingEventTimeWindows;
 import org.apache.flink.streaming.api.windowing.time.Time;
+import org.apache.flink.util.Collector;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.producer.ProducerConfig;
 
@@ -72,15 +78,29 @@ public class CoinAnalysisJob {
                 .process(new MomentumCalculator())
                 .name("1 hours momentum");
 
+        DataStream<Double> shortMinuteEma = minuteCandlePrices
+                .keyBy(Candle::getCode)
+                .window(SlidingEventTimeWindows.of(Time.minutes(12), Time.minutes(1)))
+                .process(new EmaCalculator())
+                .name("12 minutes EMA");
+
+        DataStream<Double> longMinuteEma = minuteCandlePrices
+                .keyBy(Candle::getCode)
+                .window(SlidingEventTimeWindows.of(Time.minutes(26), Time.minutes(1)))
+                .process(new EmaCalculator())
+                .name("26 minutes EMA");
+
+        DataStream<Double> minuteMACD = shortMinuteEma.join(longMinuteEma).where(aDouble -> true).equalTo(aDouble -> true).window(TumblingEventTimeWindows.of(Time.minutes(1)))
+                .apply((first, second) -> first - second);
 
 
-
-
+        minuteMACD.print("1 minutes MACD");
         hourMomentumPrices.print("1 hours momentum");
         minuteCandlePrices.print("1 minutes candle");
         movingAveragePrices.print("1 minutes average");
         min10MovingAveragePrices.print("10 minutes average");
         hourMovingAveragePrices.print("1 hours average");
+        shortMinuteEma.print("12 minutes EMA");
         env.execute("Coin Data Analysis");
 
     }
