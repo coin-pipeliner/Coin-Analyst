@@ -1,9 +1,12 @@
 package coinanalysis;
 
+import coinanalysis.records.MovingAverage;
 import coinanalysis.records.Ticker;
 import coinanalysis.records.TickerDeserializationSchema;
 import org.apache.flink.api.common.eventtime.WatermarkStrategy;
 import org.apache.flink.connector.kafka.source.KafkaSource;
+import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.core.JsonProcessingException;
+import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.api.windowing.assigners.SlidingEventTimeWindows;
@@ -22,7 +25,6 @@ import org.apache.flink.streaming.connectors.elasticsearch7.ElasticsearchSink;
 import org.apache.http.HttpHost;
 import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.client.Requests;
-
 import java.util.*;
 import java.time.Duration;
 
@@ -52,7 +54,7 @@ public class CoinAnalysisJob {
         DataStream<Ticker> tickers = env.fromSource(source, watermarkStrategy, "Ticker Source");
 
 
-        DataStream<Double> hourMovingAveragePrices = tickers
+        DataStream<MovingAverage> hourMovingAveragePrices = tickers
                 .keyBy(Ticker::getCode)
                 .window(SlidingEventTimeWindows.of(Time.hours(1), Time.minutes(1)))
                 .process(new MovingAverageCalculator())
@@ -61,20 +63,30 @@ public class CoinAnalysisJob {
         List<HttpHost> httpHosts = new ArrayList<>();
         httpHosts.add(new HttpHost("elasticsearch", 9200, "http"));
 
-        ElasticsearchSink.Builder<Double> esSinkBuilder = new ElasticsearchSink.Builder<>(
+        ElasticsearchSink.Builder<MovingAverage> esSinkBuilder = new ElasticsearchSink.Builder<>(
                 httpHosts,
-                new ElasticsearchSinkFunction<Double>() {
-                    public IndexRequest createIndexRequest(Double element) {
-                        Map<String, Double> json = new HashMap<>();
-                        json.put("data", element);
+                new ElasticsearchSinkFunction<MovingAverage>() {
+                    public IndexRequest createIndexRequest(MovingAverage element) {
 
-                        return Requests.indexRequest()
-                                .index("hour-moving-average-prices")
-                                .source(json);
+                        ObjectMapper mapper = new ObjectMapper();
+
+                        try {
+
+                            String elementJson = mapper.writeValueAsString(element);
+
+                            Map<String, String> json = new HashMap<>();
+                            json.put("data", elementJson);
+                            return Requests.indexRequest()
+                                    .index("mvp")
+                                    .source(json);
+                        } catch (JsonProcessingException e) {
+                            throw new RuntimeException(e);
+                        }
+
                     }
 
                     @Override
-                    public void process(Double element, RuntimeContext ctx, RequestIndexer indexer) {
+                    public void process(MovingAverage element, RuntimeContext ctx, RequestIndexer indexer) {
                         indexer.add(createIndexRequest(element));
                     }
                 }
