@@ -5,6 +5,7 @@ import coinanalysis.records.Ticker;
 import coinanalysis.records.TickerDeserializationSchema;
 import org.apache.flink.api.common.eventtime.WatermarkStrategy;
 import org.apache.flink.connector.kafka.source.KafkaSource;
+import org.apache.flink.connector.kafka.source.enumerator.initializer.OffsetsInitializer;
 import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.core.JsonProcessingException;
 import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.flink.streaming.api.datastream.DataStream;
@@ -25,6 +26,10 @@ import org.apache.flink.streaming.connectors.elasticsearch7.ElasticsearchSink;
 import org.apache.http.HttpHost;
 import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.client.Requests;
+import org.elasticsearch.common.xcontent.XContentBuilder;
+import org.elasticsearch.common.xcontent.XContentFactory;
+
+import java.io.IOException;
 import java.util.*;
 import java.time.Duration;
 
@@ -43,6 +48,7 @@ public class CoinAnalysisJob {
         KafkaSource<Ticker> source = KafkaSource.<Ticker>builder()
                 .setTopics(inputTopic)
                 .setGroupId(groupId)
+                .setStartingOffsets(OffsetsInitializer.latest())
                 .setValueOnlyDeserializer(new TickerDeserializationSchema())
                 .setProperties(kafkaProps)
                 .build();
@@ -71,15 +77,15 @@ public class CoinAnalysisJob {
                         ObjectMapper mapper = new ObjectMapper();
 
                         try {
-
-                            String elementJson = mapper.writeValueAsString(element);
-
-                            Map<String, String> json = new HashMap<>();
-                            json.put("data", elementJson);
                             return Requests.indexRequest()
-                                    .index("mvp")
-                                    .source(json);
-                        } catch (JsonProcessingException e) {
+                                    .index("hour_moving_average")
+                                    .source(XContentFactory.jsonBuilder().startObject()
+                                            .field("average", element.getAverage())
+                                            .field("lastTickerDateTime", element.getLastTickerDateTime())
+                                            .field("lastTickerTimestamp", element.getLastTickerTimestamp())
+                                        .endObject()
+                                    );
+                        } catch (IOException e) {
                             throw new RuntimeException(e);
                         }
 

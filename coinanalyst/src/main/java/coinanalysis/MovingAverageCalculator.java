@@ -6,6 +6,9 @@ import org.apache.flink.streaming.api.functions.windowing.ProcessWindowFunction;
 import org.apache.flink.streaming.api.windowing.windows.TimeWindow;
 import org.apache.flink.util.Collector;
 
+import java.util.Calendar;
+import java.util.Date;
+
 public class MovingAverageCalculator extends ProcessWindowFunction<Ticker, MovingAverage, String, TimeWindow> {
 
     @Override
@@ -26,6 +29,7 @@ public class MovingAverageCalculator extends ProcessWindowFunction<Ticker, Movin
 
         double avg = sum / tickerCount;
         long lastTickerTimestamp = lastTicker.getTimestamp();
+
         MovingAverage movingAverage = new MovingAverage(avg, lastTickerTimestamp);
         results.collect(movingAverage);
 

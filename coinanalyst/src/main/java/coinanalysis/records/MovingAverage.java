@@ -1,9 +1,24 @@
 package coinanalysis.records;
 import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.annotation.JsonProperty;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
 public class MovingAverage {
     private double average;
+    private Date lastTickerDateTime;
+
+    public Date getLastTickerDateTime() {
+        return lastTickerDateTime;
+    }
+
+    public void setLastTickerDateTime(Date lastTickerDateTime) {
+        this.lastTickerDateTime = lastTickerDateTime;
+    }
+
     private long lastTickerTimestamp;
+
 
     public double getAverage() {
         return average;
@@ -23,6 +38,8 @@ public class MovingAverage {
 
     public MovingAverage(double average, long lastTickerTimestamp) {
         this.average = average;
+        this.lastTickerDateTime = new Date(lastTickerTimestamp);
         this.lastTickerTimestamp = lastTickerTimestamp;
     }
+
 }
