@@ -78,7 +78,7 @@ public class CoinAnalysisJob {
 
                         try {
                             return Requests.indexRequest()
-                                    .index("hour_moving_average")
+                                    .index("hour-moving-average")
                                     .source(XContentFactory.jsonBuilder().startObject()
                                             .field("average", element.getAverage())
                                             .field("lastTickerDateTime", element.getLastTickerDateTime())
