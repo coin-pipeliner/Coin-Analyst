@@ -27,10 +27,11 @@ public class MovingAverageCalculator extends ProcessWindowFunction<Ticker, Movin
             lastTicker = ticker;
         }
 
+        String code = lastTicker.getCode();
         double avg = sum / tickerCount;
         long lastTickerTimestamp = lastTicker.getTimestamp();
 
-        MovingAverage movingAverage = new MovingAverage(avg, lastTickerTimestamp);
+        MovingAverage movingAverage = new MovingAverage(code, avg, lastTickerTimestamp);
         results.collect(movingAverage);
 
     }

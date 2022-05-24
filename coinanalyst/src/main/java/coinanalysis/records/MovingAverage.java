@@ -6,6 +6,8 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 public class MovingAverage {
+
+    private String code;
     private double average;
     private Date lastTickerDateTime;
 
@@ -18,6 +20,13 @@ public class MovingAverage {
     }
 
     private long lastTickerTimestamp;
+    public String getCode() {
+        return code;
+    }
+
+    public void setCode(String code) {
+        this.code = code;
+    }
 
 
     public double getAverage() {
@@ -36,7 +45,8 @@ public class MovingAverage {
         this.lastTickerTimestamp = lastTickerTimestamp;
     }
 
-    public MovingAverage(double average, long lastTickerTimestamp) {
+    public MovingAverage(String code, double average, long lastTickerTimestamp) {
+        this.code = code;
         this.average = average;
         this.lastTickerDateTime = new Date(lastTickerTimestamp);
         this.lastTickerTimestamp = lastTickerTimestamp;
