@@ -1,17 +1,21 @@
 package coinanalysis;
 
-import coinanalysis.records.MovingAverage;
-import coinanalysis.records.Ticker;
-import coinanalysis.records.TickerDeserializationSchema;
+import coinanalysis.records.*;
 import org.apache.flink.api.common.eventtime.WatermarkStrategy;
+import org.apache.flink.api.common.functions.FlatMapFunction;
+import org.apache.flink.api.java.functions.KeySelector;
 import org.apache.flink.connector.kafka.source.KafkaSource;
 import org.apache.flink.connector.kafka.source.enumerator.initializer.OffsetsInitializer;
 import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.core.JsonProcessingException;
 import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
+import org.apache.flink.streaming.api.functions.co.CoMapFunction;
+import org.apache.flink.streaming.api.functions.co.CoProcessFunction;
 import org.apache.flink.streaming.api.windowing.assigners.SlidingEventTimeWindows;
+import org.apache.flink.streaming.api.windowing.assigners.TumblingEventTimeWindows;
 import org.apache.flink.streaming.api.windowing.time.Time;
+import org.apache.flink.util.Collector;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.CredentialsProvider;
@@ -32,6 +36,7 @@ import org.elasticsearch.common.xcontent.XContentFactory;
 import java.io.IOException;
 import java.util.*;
 import java.time.Duration;
+import java.util.Properties;
 
 public class CoinAnalysisJob {
     public static void main(String[] args) throws Exception {
@@ -57,34 +62,43 @@ public class CoinAnalysisJob {
                 .<Ticker>forBoundedOutOfOrderness(Duration.ofMillis(200))
                 .withTimestampAssigner((ticker, l) -> ticker.getTimestamp());
 
+
         DataStream<Ticker> tickers = env.fromSource(source, watermarkStrategy, "Ticker Source");
 
-
-        DataStream<MovingAverage> hourMovingAveragePrices = tickers
+        DataStream<Candle> minuteCandlePrices = tickers
                 .keyBy(Ticker::getCode)
+                .window(SlidingEventTimeWindows.of(Time.minutes(1), Time.seconds(1)))
+                .process(new CandleChartCalculator())
+                .name("1 minutes candle");
+
+
+        DataStream<Indicator> hourIndicator = minuteCandlePrices
+                .keyBy(Candle::getCode)
                 .window(SlidingEventTimeWindows.of(Time.hours(1), Time.minutes(1)))
-                .process(new MovingAverageCalculator())
-                .name("1 hours average");
+                .process(new IndicatorCalculator())
+                .name("1 hours indicator");
 
         List<HttpHost> httpHosts = new ArrayList<>();
         httpHosts.add(new HttpHost("elasticsearch", 9200, "http"));
 
-        ElasticsearchSink.Builder<MovingAverage> esSinkBuilder = new ElasticsearchSink.Builder<>(
+
+        ElasticsearchSink.Builder<Indicator> esSinkBuilder = new ElasticsearchSink.Builder<>(
                 httpHosts,
-                new ElasticsearchSinkFunction<MovingAverage>() {
-                    public IndexRequest createIndexRequest(MovingAverage element) {
+                new ElasticsearchSinkFunction<Indicator>() {
+                    public IndexRequest createIndexRequest(Indicator indicator) {
 
                         ObjectMapper mapper = new ObjectMapper();
 
                         try {
                             return Requests.indexRequest()
-                                    .index("hour-moving-average")
+                                    .index("hour-indicator")
                                     .source(XContentFactory.jsonBuilder().startObject()
-                                            .field("code", element.getCode())
-                                            .field("average", element.getAverage())
-                                            .field("lastTickerDateTime", element.getLastTickerDateTime())
-                                            .field("lastTickerTimestamp", element.getLastTickerTimestamp())
-                                        .endObject()
+                                            .field("code", indicator.getCode())
+                                            .field("moving_average",indicator.getMa())
+                                            .field("exponential_moving_average",indicator.getEma())
+                                            .field("momentum",indicator.getMomentum())
+                                            .field("lastTickerDateTime", indicator.getLastTickerDateTime())
+                                            .endObject()
                                     );
                         } catch (IOException e) {
                             throw new RuntimeException(e);
@@ -93,14 +107,14 @@ public class CoinAnalysisJob {
                     }
 
                     @Override
-                    public void process(MovingAverage element, RuntimeContext ctx, RequestIndexer indexer) {
-                        indexer.add(createIndexRequest(element));
+                    public void process(Indicator indicator, RuntimeContext ctx, RequestIndexer indexer) {
+                        indexer.add(createIndexRequest(indicator));
                     }
                 }
         );
 
 // configuration for the bulk requests; this instructs the sink to emit after every element, otherwise they would be buffered
-//        esSinkBuilder.setBulkFlushMaxActions(1);
+        esSinkBuilder.setBulkFlushMaxActions(1);
 
         esSinkBuilder.setRestClientFactory(
                 restClientBuilder -> restClientBuilder.setHttpClientConfigCallback(httpClientBuilder -> {
@@ -113,9 +127,14 @@ public class CoinAnalysisJob {
                 })
         );
 
+        esSinkBuilder.setFailureHandler((actionRequest, throwable, i, requestIndexer) -> {});
+
 // finally, build and add the sink to the job's pipeline
-        hourMovingAveragePrices.addSink(esSinkBuilder.build());
+        hourIndicator.addSink(esSinkBuilder.build());
         env.execute("Coin Data Analysis");
+
+
+
 
     }
 }
