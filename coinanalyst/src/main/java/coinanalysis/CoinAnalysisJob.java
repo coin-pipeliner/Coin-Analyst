@@ -1,7 +1,6 @@
 package coinanalysis;
 
-import coinanalysis.records.Ticker;
-import coinanalysis.records.TickerDeserializationSchema;
+import coinanalysis.records.*;
 import org.apache.flink.api.common.eventtime.WatermarkStrategy;
 import org.apache.flink.api.common.functions.FlatMapFunction;
 import org.apache.flink.api.java.functions.KeySelector;
@@ -63,22 +62,17 @@ public class CoinAnalysisJob {
                 .<Ticker>forBoundedOutOfOrderness(Duration.ofMillis(200))
                 .withTimestampAssigner((ticker, l) -> ticker.getTimestamp());
 
+
         DataStream<Ticker> tickers = env.fromSource(source, watermarkStrategy, "Ticker Source");
 
 
-        DataStream<MovingAverage> hourMovingAveragePrices = tickers
-                .keyBy(Ticker::getCode)
-                .window(SlidingEventTimeWindows.of(Time.hours(1), Time.minutes(1)))
-                .process(new MovingAverageCalculator())
-                .name("1 hours average");
+//        DataStream<MovingAverage> hourMovingAveragePrices = tickers
+//                .keyBy(Ticker::getCode)
+//                .window(SlidingEventTimeWindows.of(Time.hours(1), Time.minutes(1)))
+//                .process(new MovingAverageCalculator())
+//                .name("1 hours average");
 
-        List<HttpHost> httpHosts = new ArrayList<>();
-        httpHosts.add(new HttpHost("elasticsearch", 9200, "http"));
 
-        ElasticsearchSink.Builder<MovingAverage> esSinkBuilder = new ElasticsearchSink.Builder<>(
-                httpHosts,
-                new ElasticsearchSinkFunction<MovingAverage>() {
-                    public IndexRequest createIndexRequest(MovingAverage element) {
         DataStream<Candle> minuteCandlePrices = tickers
                 .keyBy(Ticker::getCode)
                 .window(SlidingEventTimeWindows.of(Time.minutes(1), Time.seconds(1)))
@@ -86,35 +80,35 @@ public class CoinAnalysisJob {
                 .name("1 minutes candle");
 
 
-        DataStream<Double> hourMomentumPrices = minuteCandlePrices
+        DataStream<Indicator> hourIndicator = minuteCandlePrices
                 .keyBy(Candle::getCode)
                 .window(SlidingEventTimeWindows.of(Time.hours(1), Time.minutes(1)))
-                .process(new MomentumCalculator())
-                .name("1 hours momentum");
+                .process(new IndicatorCalculator())
+                .name("1 hours indicator");
 
-        DataStream<Double> shortMinuteEma = minuteCandlePrices
-                .keyBy(Candle::getCode)
-                .window(SlidingEventTimeWindows.of(Time.minutes(12), Time.minutes(1)))
-                .process(new EmaCalculator())
-                .name("12 minutes EMA");
 
-        DataStream<Double> longMinuteEma = minuteCandlePrices
-                .keyBy(Candle::getCode)
-                .window(SlidingEventTimeWindows.of(Time.minutes(26), Time.minutes(1)))
-                .process(new EmaCalculator())
-                .name("26 minutes EMA");
+
+        List<HttpHost> httpHosts = new ArrayList<>();
+        httpHosts.add(new HttpHost("elasticsearch", 9200, "http"));
+
+
+        ElasticsearchSink.Builder<Indicator> esSinkBuilder = new ElasticsearchSink.Builder<>(
+                httpHosts,
+                new ElasticsearchSinkFunction<Indicator>() {
+                    public IndexRequest createIndexRequest(Indicator indicator) {
 
                         ObjectMapper mapper = new ObjectMapper();
 
                         try {
                             return Requests.indexRequest()
-                                    .index("hour-moving-average")
+                                    .index("hour-indicator")
                                     .source(XContentFactory.jsonBuilder().startObject()
-                                            .field("code", element.getCode())
-                                            .field("average", element.getAverage())
-                                            .field("lastTickerDateTime", element.getLastTickerDateTime())
-                                            .field("lastTickerTimestamp", element.getLastTickerTimestamp())
-                                        .endObject()
+                                            .field("code", indicator.getCode())
+                                            .field("moving_average",indicator.getMa())
+                                            .field("exponential_moving_average",indicator.getEma())
+                                            .field("momentum",indicator.getMomentum())
+                                            .field("lastTickerDateTime", indicator.getLastTickerDateTime())
+                                            .endObject()
                                     );
                         } catch (IOException e) {
                             throw new RuntimeException(e);
@@ -123,14 +117,14 @@ public class CoinAnalysisJob {
                     }
 
                     @Override
-                    public void process(MovingAverage element, RuntimeContext ctx, RequestIndexer indexer) {
-                        indexer.add(createIndexRequest(element));
+                    public void process(Indicator indicator, RuntimeContext ctx, RequestIndexer indexer) {
+                        indexer.add(createIndexRequest(indicator));
                     }
                 }
         );
 
 // configuration for the bulk requests; this instructs the sink to emit after every element, otherwise they would be buffered
-//        esSinkBuilder.setBulkFlushMaxActions(1);
+        esSinkBuilder.setBulkFlushMaxActions(1);
 
         esSinkBuilder.setRestClientFactory(
                 restClientBuilder -> restClientBuilder.setHttpClientConfigCallback(httpClientBuilder -> {
@@ -143,20 +137,14 @@ public class CoinAnalysisJob {
                 })
         );
 
+        esSinkBuilder.setFailureHandler((actionRequest, throwable, i, requestIndexer) -> {});
+
 // finally, build and add the sink to the job's pipeline
-        hourMovingAveragePrices.addSink(esSinkBuilder.build());
-        DataStream<Double> minuteMACD = shortMinuteEma.join(longMinuteEma).where(aDouble -> true).equalTo(aDouble -> true).window(TumblingEventTimeWindows.of(Time.minutes(1)))
-                .apply((first, second) -> first - second);
-
-
-        minuteMACD.print("1 minutes MACD");
-        hourMomentumPrices.print("1 hours momentum");
-        minuteCandlePrices.print("1 minutes candle");
-        movingAveragePrices.print("1 minutes average");
-        min10MovingAveragePrices.print("10 minutes average");
-        hourMovingAveragePrices.print("1 hours average");
-        shortMinuteEma.print("12 minutes EMA");
+        hourIndicator.addSink(esSinkBuilder.build());
         env.execute("Coin Data Analysis");
+
+
+
 
     }
 }
