@@ -32,15 +32,15 @@ public class CandleChartCalculator extends ProcessWindowFunction<Ticker, Candle,
             if(startPrice==0){
                 startPrice = curPrice;
             }
-            highPrice = Math.max(curPrice,highPrice);
-            lowPrice = Math.min(curPrice,lowPrice);
+            highPrice = Math.max(curPrice, highPrice);
+            lowPrice = Math.min(curPrice, lowPrice);
         }
         endPrice = curPrice;
 
         long lastTickerTimestamp = curTick.getTimestamp();
 
 
-        results.collect(new Candle(key,startPrice,highPrice,lowPrice,endPrice,lastTickerTimestamp));
+        results.collect(new Candle(key, startPrice, highPrice, lowPrice, endPrice, lastTickerTimestamp));
 
     }
 }
