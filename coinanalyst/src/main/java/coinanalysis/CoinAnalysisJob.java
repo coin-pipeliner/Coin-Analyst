@@ -65,14 +65,6 @@ public class CoinAnalysisJob {
 
         DataStream<Ticker> tickers = env.fromSource(source, watermarkStrategy, "Ticker Source");
 
-
-//        DataStream<MovingAverage> hourMovingAveragePrices = tickers
-//                .keyBy(Ticker::getCode)
-//                .window(SlidingEventTimeWindows.of(Time.hours(1), Time.minutes(1)))
-//                .process(new MovingAverageCalculator())
-//                .name("1 hours average");
-
-
         DataStream<Candle> minuteCandlePrices = tickers
                 .keyBy(Ticker::getCode)
                 .window(SlidingEventTimeWindows.of(Time.minutes(1), Time.seconds(1)))
@@ -85,8 +77,6 @@ public class CoinAnalysisJob {
                 .window(SlidingEventTimeWindows.of(Time.hours(1), Time.minutes(1)))
                 .process(new IndicatorCalculator())
                 .name("1 hours indicator");
-
-
 
         List<HttpHost> httpHosts = new ArrayList<>();
         httpHosts.add(new HttpHost("elasticsearch", 9200, "http"));
